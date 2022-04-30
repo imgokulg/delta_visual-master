@@ -1,3 +1,12 @@
+
+const GRAY_COLOR = 0xd3d3d3;
+const BLACK_COLOR = 0x000000;
+const CUBE_SIDE_LENGTH = 350;
+const CAMERA_MAX_DISTANCE = 6;
+const NO_OF_POINTS_FOR_LINE = 10;
+
+
+
 var coordinatePoints = [
     [-29.057, 35.798, 49.912],
     [-29.057, 35.797, 49.912],
@@ -221,7 +230,7 @@ var coordinatePoints = [
     [0.001, -0.008, 150.001],
     [0.002, -0.008, 150.001],
     [0.002, -0.008, 150.001],
-    [0.001, -0.007, 150.001]
+    [0.001, -0.007, 150.001],
 ];
 
 /*[

@@ -9,31 +9,14 @@ let camera, scene, renderer;
 let positions;
 let particles;
 let pointCloud;
-
-const CUBE_SIDE_LENGTH = 50;
-const CAMERA_MAX_DISTANCE = 6;
-const NO_OF_POINTS_FOR_LINE = 10;
 let linesMesh;
 let coordinateVectors = [];
-const limit = 0.2;
+
 //Check distance and ignore if distance is less than 0.1
-let coordinatePointsData = [];
-let prev = coordinatePoints[0];
-coordinatePointsData.push(prev);
-for (let i = 1; i < coordinatePoints.length; i++) {
-  let curr = coordinatePoints[i];
-  let dist = distance(curr, prev);
-  if (dist > 0.1) {
-    prev = curr;
-    coordinatePointsData.push(curr);
-  }
-
-}
+let coordinatePointsData = removePointsWithLessDistance(coordinatePoints, 0.1);
 coordinatePointsData.forEach(e => {
-  coordinateVectors.push(new THREE.Vector3(e[0] * limit, e[1] * limit, e[2] * limit));
+  coordinateVectors.push(new THREE.Vector3(e[0], e[1], e[2]));
 });
-
-
 
 function init() {
   container = document.getElementById("container");
@@ -43,7 +26,7 @@ function init() {
     1,
     4000
   );
-  camera.position.z = 200;
+  camera.position.z = CUBE_SIDE_LENGTH * 3;
 
   const controls = new OrbitControls(camera, container);
   controls.minDistance = CUBE_SIDE_LENGTH;
@@ -52,7 +35,7 @@ function init() {
 
   scene = new THREE.Scene();
   //Change background of the scene
-  scene.background = new THREE.Color(0xd3d3d3);
+  scene.background = new THREE.Color(GRAY_COLOR);
 
   group = new THREE.Group();
   scene.add(group);
@@ -65,17 +48,16 @@ function init() {
   );
   scene.add(new THREE.AxesHelper(CUBE_SIDE_LENGTH / 2));
   //Box Gemoetry Color
-  helper.material.color.setHex(0x000000);
+  helper.material.color.setHex(BLACK_COLOR);
   //helper.material.blending = THREE.AdditiveBlending;
   helper.material.transparent = true;
   group.add(helper);
 
-  const segments = CUBE_SIDE_LENGTH * CUBE_SIDE_LENGTH * CUBE_SIDE_LENGTH;
-  positions = new Float32Array(segments * 3);
+  positions = new Float32Array(CUBE_SIDE_LENGTH * 3);
 
   const pMaterial = new THREE.PointsMaterial({
-    color: 0xff0000,
-    size: 3,
+    color: GRAY_COLOR,
+    size: 1,
     transparent: true,
     sizeAttenuation: false,
   });
@@ -98,7 +80,7 @@ function init() {
   geometry.computeBoundingSphere();
 
   const lineMaterial = new THREE.LineBasicMaterial({
-    color: 0x000000,
+    color: BLACK_COLOR,
     linewidth: 1
   });
   linesMesh = new THREE.LineSegments(geometry, lineMaterial);
@@ -112,34 +94,24 @@ function init() {
 
 
   container.appendChild(renderer.domElement);
-
-  window.addEventListener("resize", onWindowResize);
-}
-
-function onWindowResize() {
-  camera.aspect = window.innerWidth / window.innerHeight;
-  camera.updateProjectionMatrix();
-
-  renderer.setSize(window.innerWidth, window.innerHeight);
 }
 
 function animate() {
   let vertexpos = 0;
-   
-    for (let i = coordinateVectors.length - NO_OF_POINTS_FOR_LINE; i < coordinateVectors.length - 1; i++) {
-      const particleDataA = coordinateVectors[i];
-      const particleDataB = coordinateVectors[i + 1];
-      if (particleDataB != undefined) {
-  
-        positions[vertexpos++] = particleDataA.x;
-        positions[vertexpos++] = particleDataA.y;
-        positions[vertexpos++] = particleDataA.z;
-  
-        positions[vertexpos++] = particleDataB.x;
-        positions[vertexpos++] = particleDataB.y;
-        positions[vertexpos++] = particleDataB.z;
-      }
-    } 
+
+  for (let i = 0; i < coordinateVectors.length - 1; i++) {
+    const particleDataA = coordinateVectors[i];
+    const particleDataB = coordinateVectors[i + 1];
+    if (particleDataB != undefined) {
+      positions[vertexpos++] = particleDataA.x;
+      positions[vertexpos++] = particleDataA.y;
+      positions[vertexpos++] = particleDataA.z;
+
+      positions[vertexpos++] = particleDataB.x;
+      positions[vertexpos++] = particleDataB.y;
+      positions[vertexpos++] = particleDataB.z;
+    }
+  }
   requestAnimationFrame(animate);
   render();
 }
@@ -152,9 +124,3 @@ function render() {
 init();
 animate();
 //Function to find distance between two vertice points
-function distance(curr, prev) {
-  var a = prev[0] - curr[0];
-  var b = prev[1] - curr[1];
-  var c = prev[2] - curr[2];
-  return Math.sqrt(a * a + b * b + c * c);
-}
