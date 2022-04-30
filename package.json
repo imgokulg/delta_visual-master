@@ -1,0 +1,25 @@
+{
+  "name": "three-demo",
+  "version": "0.0.0",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "serve": "vite preview"
+  },
+  "devDependencies": {
+    "vite": "^2.3.0"
+  },
+  "dependencies": {
+    "lil-gui": "^0.16.1",
+    "node-csv": "^0.1.2",
+    "requirejs": "^2.3.6",
+    "stats-js": "^1.0.1",
+    "three": "^0.128.0",
+    "three-js": "^79.0.0"
+  },
+  "description": "- Watch the [full tutorial](https://youtu.be/Q7AOvWpIVHU) on YouTube - [Scrollable Three.js Animation](https://fireship.io/snippets/threejs-scrollbar-animation) Snippet",
+  "main": "main.js",
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
