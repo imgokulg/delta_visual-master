@@ -40,6 +40,30 @@ function init() {
   group = new THREE.Group();
   scene.add(group);
 
+  const x = 0, y = 0;
+
+  const heartShape = new THREE.Shape();
+
+  heartShape.moveTo(x + 5, y + 5);
+  heartShape.bezierCurveTo(x + 5, y + 5, x + 4, y, x, y);
+  heartShape.bezierCurveTo(x - 6, y, x - 6, y + 7, x - 6, y + 7);
+  heartShape.bezierCurveTo(x - 6, y + 11, x - 3, y + 15.4, x + 5, y + 19);
+  heartShape.bezierCurveTo(x + 12, y + 15.4, x + 16, y + 11, x + 16, y + 7);
+  heartShape.bezierCurveTo(x + 16, y + 7, x + 16, y, x + 10, y);
+  heartShape.bezierCurveTo(x + 7, y, x + 5, y + 5, x + 5, y + 5);
+
+  const ShapeGeometry = new THREE.ShapeGeometry(heartShape);
+
+  let geo = PolygonGeometry(5);
+  const wireframe = new THREE.WireframeGeometry(geo);
+
+  const line = new THREE.LineSegments(wireframe);
+  line.material.depthTest = false;
+  line.material.opacity = 1;
+  line.material.transparent = true;
+
+  scene.add(line);
+
   let boxgeo = new THREE.BoxGeometry(CUBE_SIDE_LENGTH, CUBE_SIDE_LENGTH, CUBE_SIDE_LENGTH)
 
   let boxMesh = new THREE.Mesh(boxgeo);
@@ -51,7 +75,7 @@ function init() {
   helper.material.color.setHex(BLACK_COLOR);
   //helper.material.blending = THREE.AdditiveBlending;
   helper.material.transparent = true;
-  group.add(helper);
+  // group.add(helper);
 
   positions = new Float32Array(CUBE_SIDE_LENGTH * 3);
 
@@ -124,3 +148,29 @@ function render() {
 init();
 animate();
 //Function to find distance between two vertice points
+function PolygonGeometry(sides) {
+  var geometry = new THREE.BufferGeometry();
+
+  // generate vertices
+  let vertices = new Float32Array([
+    -100, 0, -100,
+    100, 0, -100,
+    100, 0, 100,
+
+    -100, 0, 100,
+    100, 0, 100,
+    -100, 0, -100,
+
+    -100, 100, -100,
+    100, 100, -100,
+    100, 100, 100,
+
+    -100, 100, 100,
+    100, 100, 100,
+    -100, 100, -100,
+  ]);
+
+
+  geometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
+  return geometry;
+}
