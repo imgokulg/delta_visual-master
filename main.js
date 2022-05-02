@@ -20,36 +20,35 @@ coordinatePointsData.forEach(vertice => {
 
 function init() {
   container = document.getElementById("container");
-  camera = new THREE.PerspectiveCamera(
-    30,
-    window.innerWidth / window.innerHeight,
-    1,
-    4000
-  );
-  camera.position.z = CUBE_SIDE_LENGTH * 4;
 
+  //Camera controls
+  camera = new THREE.PerspectiveCamera(30, window.innerWidth / window.innerHeight, 1, 4000);
+  camera.position.z = CUBE_SIDE_LENGTH * 4;
   const controls = new OrbitControls(camera, container);
   controls.minDistance = CUBE_SIDE_LENGTH;
   controls.maxDistance = CUBE_SIDE_LENGTH * CAMERA_MAX_DISTANCE;
 
 
   scene = new THREE.Scene();
+
   //Change background of the scene
   scene.background = new THREE.Color(GRAY_COLOR);
-
   group = new THREE.Group();
   scene.add(group);
 
+  //Polygon geomtery
   const wireframe = new THREE.WireframeGeometry(getPolyGeometry(CUBE_SIDE_LENGTH / 2));
-
   const lineSegments = new THREE.LineSegments(wireframe);
+
+  //Polygon material configs
+  lineSegments.material.color.setHex(BLACK_COLOR);
   lineSegments.material.depthTest = false;
   lineSegments.material.opacity = 1;
-  lineSegments.material.color.setHex(BLACK_COLOR);
   lineSegments.material.transparent = true;
+  group.add(lineSegments);
 
-  scene.add(lineSegments);
-  scene.add(new THREE.AxesHelper(CUBE_SIDE_LENGTH / 2));
+  //Axes addition
+  group.add(new THREE.AxesHelper(CUBE_SIDE_LENGTH / 2));
   /* 
       //Removed Box helper
 
@@ -65,12 +64,7 @@ function init() {
       group.add(helper);
   */
   positions = new Float32Array(CUBE_SIDE_LENGTH * 3);
-  const pMaterial = new THREE.PointsMaterial({
-    color: RED_COLOR,
-    size: 1,
-    transparent: true,
-    sizeAttenuation: false,
-  });
+  const pMaterial = new THREE.PointsMaterial({ color: RED_COLOR, size: 1, transparent: true, sizeAttenuation: false, });
 
   particles = new THREE.BufferGeometry().setFromPoints(coordinateVectors);
 
@@ -78,30 +72,20 @@ function init() {
   pointCloud = new THREE.Points(particles, pMaterial);
   group.add(pointCloud);
 
-  const geometry = new THREE.BufferGeometry();
 
-  geometry.setAttribute(
-    "position",
-    new THREE.BufferAttribute(positions, 3).setUsage(
-      THREE.DynamicDrawUsage
-    )
-  );
-
-  geometry.computeBoundingSphere();
-
-  const lineMaterial = new THREE.LineBasicMaterial({
-    color: RED_COLOR,
-    linewidth: 1
-  });
-  linesMesh = new THREE.LineSegments(geometry, lineMaterial);
+  //Vertice connecting line mesh constrcution
+  const lineGeometry = new THREE.BufferGeometry();
+  lineGeometry.setAttribute("position", new THREE.BufferAttribute(positions, 3).setUsage(THREE.DynamicDrawUsage));
+  lineGeometry.computeBoundingSphere();
+  const lineMaterial = new THREE.LineBasicMaterial({ color: RED_COLOR, linewidth: 1 });
+  linesMesh = new THREE.LineSegments(lineGeometry, lineMaterial);
   group.add(linesMesh);
 
-
+  //WebGL Renderer
   renderer = new THREE.WebGLRenderer({ antialias: true });
   renderer.setPixelRatio(window.devicePixelRatio);
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.outputEncoding = THREE.sRGBEncoding;
-
 
   container.appendChild(renderer.domElement);
 }
@@ -109,7 +93,7 @@ function init() {
 function animate() {
   let vertexpos = 0;
 
-  //Draw lines between two points
+  //Connect all point with line mesh
   for (let i = 0; i < coordinateVectors.length - 1; i++) {
     const particleDataA = coordinateVectors[i];
     const particleDataB = coordinateVectors[i + 1];
@@ -128,8 +112,13 @@ function animate() {
 }
 
 function render() {
-  //const time = Date.now() * 0.001;
-  //group.rotation.y = time * 0.1;
+  /*
+  //rotating the helper geometry
+
+  const time = Date.now() * 0.001;
+  group.rotation.y = time * 0.1;
+
+  */
   renderer.render(scene, camera);
 }
 
@@ -141,7 +130,8 @@ function getPolyGeometry(hgtOfPlane) {
   let geometry = new THREE.BufferGeometry();
   // generate vertices
   let vertices = new Float32Array([
-    /**bottom plane **/
+    /** bottom plane **/
+
     -93, 0, 246, 0, 0, 0, 93, 0, 246,
     -93, 0, 246, 0, 0, 0, -260, 0, -42,
     93, 0, 246, 0, 0, 0, 260, 0, -42,
@@ -151,7 +141,8 @@ function getPolyGeometry(hgtOfPlane) {
 
     /************************************/
 
-    /**upper plane **/
+    /** upper plane **/
+
     -93, hgtOfPlane, 246, 0, hgtOfPlane, 0, 93, hgtOfPlane, 246,
     -93, hgtOfPlane, 246, 0, hgtOfPlane, 0, -260, hgtOfPlane, -42,
     93, hgtOfPlane, 246, 0, hgtOfPlane, 0, 260, hgtOfPlane, -42,
@@ -161,10 +152,12 @@ function getPolyGeometry(hgtOfPlane) {
 
     /************************************/
 
-    /**small plane connecting**/
+    /** small plane connecting **/
+
     -93, 0, 246, -93, hgtOfPlane, 246, 93, hgtOfPlane, 246, -93, hgtOfPlane, 246, 93, hgtOfPlane, 246, 93, 0, 246,
     -260, 0, -42, -260, hgtOfPlane, -42, -204, 0, -166, -204, 0, -166, -204, hgtOfPlane, -166, -260, 0, -42,
     260, 0, -42, 260, hgtOfPlane, -42, 204, 0, -166, 204, 0, -166, 204, hgtOfPlane, -166, 260, 0, -42
+
     /************************************/
   ]);
 
