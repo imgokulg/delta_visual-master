@@ -4,7 +4,7 @@
  * @return distance bt 2 points in coordinate system
  */
 
-const distanceBtwTwoCoordinatePoints = function (point1, point2) {
+ const distanceBtwTwoCoordinatePoints = function (point1, point2) {
     var a = point1[0] - point2[0];
     var b = point1[1] - point2[1];
     var c = point1[2] - point2[2];
@@ -31,3 +31,4 @@ const removePointsWithLessDistance = function (coordinatePoints, minDistance) {
     }
     return coordinatePointsData;
 }
+

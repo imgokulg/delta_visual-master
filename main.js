@@ -1,7 +1,6 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 
-
 let group;
 let container;
 
@@ -14,9 +13,10 @@ let coordinateVectors = [];
 
 //Check distance and ignore if distance is less than 0.1
 let coordinatePointsData = removePointsWithLessDistance(coordinatePoints, 0.1);
-coordinatePointsData.forEach(e => {
-  coordinateVectors.push(new THREE.Vector3(e[0], e[1], e[2]));
+coordinatePointsData.forEach(vertice => {
+  coordinateVectors.push(new THREE.Vector3(vertice[0], vertice[1], vertice[2]));
 });
+
 
 function init() {
   container = document.getElementById("container");
@@ -26,7 +26,7 @@ function init() {
     1,
     4000
   );
-  camera.position.z = CUBE_SIDE_LENGTH * 3;
+  camera.position.z = CUBE_SIDE_LENGTH * 4;
 
   const controls = new OrbitControls(camera, container);
   controls.minDistance = CUBE_SIDE_LENGTH;
@@ -40,47 +40,33 @@ function init() {
   group = new THREE.Group();
   scene.add(group);
 
-  const x = 0, y = 0;
+  const wireframe = new THREE.WireframeGeometry(getPolyGeometry(CUBE_SIDE_LENGTH / 2));
 
-  const heartShape = new THREE.Shape();
+  const lineSegments = new THREE.LineSegments(wireframe);
+  lineSegments.material.depthTest = false;
+  lineSegments.material.opacity = 1;
+  lineSegments.material.color.setHex(BLACK_COLOR);
+  lineSegments.material.transparent = true;
 
-  heartShape.moveTo(x + 5, y + 5);
-  heartShape.bezierCurveTo(x + 5, y + 5, x + 4, y, x, y);
-  heartShape.bezierCurveTo(x - 6, y, x - 6, y + 7, x - 6, y + 7);
-  heartShape.bezierCurveTo(x - 6, y + 11, x - 3, y + 15.4, x + 5, y + 19);
-  heartShape.bezierCurveTo(x + 12, y + 15.4, x + 16, y + 11, x + 16, y + 7);
-  heartShape.bezierCurveTo(x + 16, y + 7, x + 16, y, x + 10, y);
-  heartShape.bezierCurveTo(x + 7, y, x + 5, y + 5, x + 5, y + 5);
-
-  const ShapeGeometry = new THREE.ShapeGeometry(heartShape);
-
-  let geo = PolygonGeometry(5);
-  const wireframe = new THREE.WireframeGeometry(geo);
-
-  const line = new THREE.LineSegments(wireframe);
-  line.material.depthTest = false;
-  line.material.opacity = 1;
-  line.material.transparent = true;
-
-  scene.add(line);
-
-  let boxgeo = new THREE.BoxGeometry(CUBE_SIDE_LENGTH, CUBE_SIDE_LENGTH, CUBE_SIDE_LENGTH)
-
-  let boxMesh = new THREE.Mesh(boxgeo);
-  const helper = new THREE.BoxHelper(
-    boxMesh
-  );
+  scene.add(lineSegments);
   scene.add(new THREE.AxesHelper(CUBE_SIDE_LENGTH / 2));
-  //Box Gemoetry Color
-  helper.material.color.setHex(BLACK_COLOR);
-  //helper.material.blending = THREE.AdditiveBlending;
-  helper.material.transparent = true;
-  // group.add(helper);
+  /* 
+      //Removed Box helper
 
+      let boxgeo = new THREE.BoxGeometry(CUBE_SIDE_LENGTH, CUBE_SIDE_LENGTH, CUBE_SIDE_LENGTH)
+    
+      let boxMesh = new THREE.Mesh(boxgeo);
+      const helper = new THREE.BoxHelper(
+        boxMesh
+      );
+      
+      helper.material.color.setHex(BLACK_COLOR);
+      helper.material.transparent = true;
+      group.add(helper);
+  */
   positions = new Float32Array(CUBE_SIDE_LENGTH * 3);
-
   const pMaterial = new THREE.PointsMaterial({
-    color: GRAY_COLOR,
+    color: RED_COLOR,
     size: 1,
     transparent: true,
     sizeAttenuation: false,
@@ -104,7 +90,7 @@ function init() {
   geometry.computeBoundingSphere();
 
   const lineMaterial = new THREE.LineBasicMaterial({
-    color: BLACK_COLOR,
+    color: RED_COLOR,
     linewidth: 1
   });
   linesMesh = new THREE.LineSegments(geometry, lineMaterial);
@@ -123,6 +109,7 @@ function init() {
 function animate() {
   let vertexpos = 0;
 
+  //Draw lines between two points
   for (let i = 0; i < coordinateVectors.length - 1; i++) {
     const particleDataA = coordinateVectors[i];
     const particleDataB = coordinateVectors[i + 1];
@@ -139,6 +126,7 @@ function animate() {
   requestAnimationFrame(animate);
   render();
 }
+
 function render() {
   //const time = Date.now() * 0.001;
   //group.rotation.y = time * 0.1;
@@ -147,29 +135,38 @@ function render() {
 
 init();
 animate();
-//Function to find distance between two vertice points
-function PolygonGeometry(sides) {
-  var geometry = new THREE.BufferGeometry();
 
+//Polygeometry
+function getPolyGeometry(hgtOfPlane) {
+  let geometry = new THREE.BufferGeometry();
   // generate vertices
   let vertices = new Float32Array([
-    -100, 0, -100,
-    100, 0, -100,
-    100, 0, 100,
+    /**bottom plane **/
+    -93, 0, 246, 0, 0, 0, 93, 0, 246,
+    -93, 0, 246, 0, 0, 0, -260, 0, -42,
+    93, 0, 246, 0, 0, 0, 260, 0, -42,
+    -204, 0, -166, 0, 0, 0, -260, 0, -42,
+    204, 0, -166, 0, 0, 0, 260, 0, -42,
+    204, 0, -166, 0, 0, 0, -204, 0, -166,
 
-    -100, 0, 100,
-    100, 0, 100,
-    -100, 0, -100,
+    /************************************/
 
-    -100, 100, -100,
-    100, 100, -100,
-    100, 100, 100,
+    /**upper plane **/
+    -93, hgtOfPlane, 246, 0, hgtOfPlane, 0, 93, hgtOfPlane, 246,
+    -93, hgtOfPlane, 246, 0, hgtOfPlane, 0, -260, hgtOfPlane, -42,
+    93, hgtOfPlane, 246, 0, hgtOfPlane, 0, 260, hgtOfPlane, -42,
+    -204, hgtOfPlane, -166, 0, hgtOfPlane, 0, -260, hgtOfPlane, -42,
+    204, hgtOfPlane, -166, 0, hgtOfPlane, 0, 260, hgtOfPlane, -42,
+    204, hgtOfPlane, -166, 0, hgtOfPlane, 0, -204, hgtOfPlane, -166,
 
-    -100, 100, 100,
-    100, 100, 100,
-    -100, 100, -100,
+    /************************************/
+
+    /**small plane connecting**/
+    -93, 0, 246, -93, hgtOfPlane, 246, 93, hgtOfPlane, 246, -93, hgtOfPlane, 246, 93, hgtOfPlane, 246, 93, 0, 246,
+    -260, 0, -42, -260, hgtOfPlane, -42, -204, 0, -166, -204, 0, -166, -204, hgtOfPlane, -166, -260, 0, -42,
+    260, 0, -42, 260, hgtOfPlane, -42, 204, 0, -166, 204, 0, -166, 204, hgtOfPlane, -166, 260, 0, -42
+    /************************************/
   ]);
-
 
   geometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
   return geometry;
